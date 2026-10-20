@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aşk & Birikim Sayacı</title>
+    <!-- Web App Manifest (Telefonlara kurulabilmesi için) -->
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Aşk%20ve%20Birikim%22,%22short_name%22:%22AşkSayaç%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23fff5f5%22,%22theme_color%22:%22%23ff4d6d%22}">
+    <style>
+        :root {
+            --primary: #ff4d6d;
+            --secondary: #ff758f;
+            --bg: #fff5f5;
+            --card-bg: #ffffff;
+            --text: #590d22;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .app-container {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(255, 77, 109, 0.15);
+            width: 100%;
+            max-width: 440px;
+            text-align: center;
+            border: 2px solid #ffb3c1;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: var(--primary);
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .heart {
+            color: var(--primary);
+            font-size: 30px;
+            animation: heartbeat 1.2s infinite;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            20% { transform: scale(1.1); }
+            40% { transform: scale(1); }
+            60% { transform: scale(1.15); }
+            80% { transform: scale(1); }
+            100% { transform: scale(1); }
+        }
+        .love-quote {
+            font-style: italic;
+            font-size: 14px;
+            color: #ff4d6d;
+            background: #fff0f3;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-left: 4px solid var(--primary);
+        }
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        label {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--secondary);
+            display: block;
+            margin-bottom: 6px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ffe5ec;
+            border-radius: 12px;
+            box-sizing: border-box;
+            font-size: 16px;
+            color: var(--text);
+            outline: none;
+            transition: 0.3s;
+        }
+        input:focus {
+            border-color: var(--secondary);
+        }
+        .result-box {
+            background: #fff5f5;
+            padding: 20px;
+            border-radius: 16px;
+            margin-top: 20px;
+            border: 1px dashed var(--secondary);
+        }
+        .result-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--secondary);
+            margin-bottom: 5px;
+        }
+        .result-val {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .result-multiplier {
+            font-size: 15px;
+            margin-top: 5px;
+            color: #800f2f;
+        }
+        .toggle-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: 0.3s;
+        }
+        .toggle-btn:hover {
+            background: #e63956;
+        }
+        .table-container {
+            margin-top: 20px;
+            max-height: 250px;
+            overflow-y: auto;
+            display: none;
+            border: 1px solid #ffe5ec;
+            border-radius: 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            text-align: left;
+        }
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ffe5ec;
+        }
+        th {
+            background: #fff0f3;
+            color: var(--text);
+            position: sticky;
+            top: 0;
+        }
+        tr:hover {
+            background: #fff5f5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="heart" onclick="changeQuote()">❤️</div>
+    <h1>Aşkla Büyüyen Birikim</h1>
+    
+    <!-- Aşk Sözü Alanı -->
+    <div class="love-quote" id="quoteBox">"Seninle geçen her gün, katlanan bir servet gibi."</div>
+
+    <div class="input-group">
+        <label>Başlangıç Tutarı (\$)</label>
+        <input type="number" id="principal" value="100" oninput="calculate()">
+    </div>
+
+    <div class="input-group">
+        <label>Günlük Sevgi / Getiri Oranı (%)</label>
+        <input type="number" id="rate" value="5" oninput="calculate()">
+    </div>
+
+    <div class="input-group">
+        <label>Gün Sayısı (Süre)</label>
+        <input type="number" id="days" value="30" oninput="calculate()">
+    </div>
+
+    <div class="result-box">
+        <div class="result-title">Gelecekteki Değer</div>
+        <div class="result-val" id="totalResult">\$432.19</div>
+        <div class="result-multiplier" id="multiplierResult">Tam 4.32 katı!</div>
+    </div>
+
+    <!-- Gün Gün Tablo Butonu -->
+    <button class="toggle-btn" onclick="toggleTable()">Günlük Detay Tablosunu Göster</button>
+
+    <!-- Günlük Tablo Alanı -->
+    <div class="table-container" id="tableContainer">
+        <table>
+            <thead>
+                <tr>
+                    <th>Gün</th>
+                    <th>Toplam Tutar</th>
+                    <th>Artış Katsayısı</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- JavaScript dinamik dolduracak -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+const quotes = [
+    "Seninle geçen her gün, katlanan bir servet gibi.",
+    "Bileşik faiz de neymiş? Benim sana olan sevgim her gün katlanarak büyüyor.",
+    "Kalbime yaptığın yatırımın getirisi paha biçilemez.",
+    "Seninle her gün %100 mutluluk garantili.",
+    "Zaman geçtikçe değerlenen tek şey aşkımız ve birikimlerimiz.",
+    "Aşk birikince güzel, tıpkı bu sayılar gibi!"
+];
+
+function changeQuote() {
+    const randomIndex = Math.floor(Math.random() * quotes.length);
+    document.getElementById('quoteBox').innerText = `"${quotes[randomIndex]}"`;
+}
+
+function calculate() {
+    const P = parseFloat(document.getElementById('principal').value) || 0;
+    const r = parseFloat(document.getElementById('rate').value) || 0;
+    const t = parseInt(document.getElementById('days').value) || 0;
+
+    const tableBody = document.getElementById('tableBody');
+    tableBody.innerHTML = '';
+
+    if (P <= 0 || t <= 0) {
+        document.getElementById('totalResult').innerText = "\$0.00";
+        document.getElementById('multiplierResult').innerText = "0 katı";
+        return;
+    }
+
+    const total = P * Math.pow((1 + (r / 100)), t);
+    const multiplier = total / P;
+
+    document.getElementById('totalResult').innerText = "\$" + total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('multiplierResult').innerText = "Tam " + multiplier.toLocaleString('en-US', {maximumFractionDigits: 2}) + " katı!";
+
+    // Tabloyu yeniden oluşturma (Maksimum performans için döngüyle kırpma sınırı koymadık ama t çok büyükse tarayıcıyı yormamak adına sınır konabilir)
+    let currentTotal = P;
+    for (let i = 1; i <= Math.min(t, 365); i++) { // En fazla 365 gün listeler
+        currentTotal = currentTotal * (1 + (r / 100));
+        const currentMultiplier = currentTotal / P;
+        
+        const row = `<tr>
+            <td>${i}. Gün</td>
+            <td>$${currentTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td>${currentMultiplier.toLocaleString('en-US', {maximumFractionDigits: 2})} Katı</td>
+        </tr>`;
+        tableBody.innerHTML += row;
+    }
+}
+
+function toggleTable() {
+    const container = document.getElementById('tableContainer');
+    const btn = document.querySelector('.toggle-btn');
+    if (container.style.display === 'block') {
+        container.style.display = 'none';
+        btn.innerText = 'Günlük Detay Tablosunu Göster';
+    } else {
+        container.style.display = 'block';
+        btn.innerText = 'Tabloyu Gizle';
+    }
+}
+
+// İlk açılışta hesaplamayı çalıştır
+calculate();
+</script>
+
+</body>
+</html>
